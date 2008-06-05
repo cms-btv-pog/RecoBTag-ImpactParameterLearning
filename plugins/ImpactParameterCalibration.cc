@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy Andrea/Andrea Rizzi
 //         Created:  Mon Aug  6 16:10:38 CEST 2007
-// $Id: ImpactParameterCalibration.cc,v 1.9 2008/03/06 08:18:49 tboccali Exp $
+// $Id: ImpactParameterCalibration.cc,v 1.6 2008/03/03 14:40:48 tboccali Exp $
 //
 //
 // system include files
@@ -41,18 +41,7 @@
 #include "CondFormats/DataRecord/interface/BTagTrackProbability3DRcd.h"
 
 #include <TClass.h>
-
-
-#include "RVersion.h"
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,15,0)
-#include "TBufferFile.h"
-typedef TBufferFile MyTBuffer;
-#else
-#include "TBuffer.h"
-typedef TBuffer MyTBuffer;
-#endif
-
-
+#include <TBuffer.h>
 #include <TBufferXML.h>
 #include <iostream>
 #include <fstream>
@@ -135,7 +124,7 @@ ImpactParameterCalibration::ImpactParameterCalibration(const edm::ParameterSet& 
       std::cout <<" Dimension not found: "<<whichCalib<<"; it must be either 2 or 3"<<std::endl;
     }
   }
-
+  std::cout << "constructor ok " << std::endl;
 }
 
 
@@ -159,11 +148,13 @@ ImpactParameterCalibration::analyze(const edm::Event& iEvent, const edm::EventSe
   Handle<reco::VertexCollection> primaryVertex;
   iEvent.getByLabel(m_pv,primaryVertex);
 
+
   vector<TrackProbabilityCalibration::Entry>::iterator found;
   vector<TrackProbabilityCalibration::Entry>::iterator it_begin;
   vector<TrackProbabilityCalibration::Entry>::iterator it_end;
 
       
+
    TrackIPTagInfoCollection::const_iterator it = ip.begin();
    for(; it != ip.end(); it++)
      {
@@ -238,7 +229,7 @@ ImpactParameterCalibration::beginJob(const edm::EventSetup & iSetup)
   v.push_back(createCategory(8,5000,0.8,1.6,8,50,3,5,0,2.5,0));
   v.push_back(createCategory(8,5000,1.6,2.4,8,50,3,5,0,2.5,0));
   v.push_back(createCategory(8,5000,0,2.4,8,50,2,2,0,2.5,0));
-  for(unsigned int i=minLoop;i <=maxLoop ;i++)
+  for(int i=minLoop;i <=maxLoop ;i++)
    for(unsigned int j=0;j<v.size() ; j++)
     {
      TrackProbabilityCalibration::Entry e;
@@ -255,7 +246,7 @@ ImpactParameterCalibration::beginJob(const edm::EventSetup & iSetup)
     ca[0]  = fromXml(config.getParameter<edm::FileInPath>("calibFile3d"));
     ca[1]  = fromXml(config.getParameter<edm::FileInPath>("calibFile2d"));
   
-    for(unsigned int i=minLoop;i <=maxLoop ;i++)
+    for(int i=minLoop;i <=maxLoop ;i++)
      for(unsigned int j=0;j<ca[i]->data.size() ; j++)
      {
       TrackProbabilityCalibration::Entry e;
@@ -283,7 +274,7 @@ ImpactParameterCalibration::beginJob(const edm::EventSetup & iSetup)
     const TrackProbabilityCalibration * ca[2];
     ca[0]  = calib3DHandle.product();
     ca[1]  = calib2DHandle.product();
-    for(unsigned int i=minLoop;i <=maxLoop ;i++)
+    for(int i=minLoop;i <=maxLoop ;i++)
     for(unsigned int j=0;j<ca[i]->data.size() ; j++)
     {
      TrackProbabilityCalibration::Entry e;
@@ -300,33 +291,7 @@ ImpactParameterCalibration::beginJob(const edm::EventSetup & iSetup)
   }
 
 
-
-/*  edm::FileInPath f2d(m_xmlfilename2D);
-    edm::FileInPath f3d(m_xmlfilename3D);
-    calibrationNew   =  new AlgorithmCalibration<TrackClassFilterCategory,CalibratedHistogramXML>((f3d.fullPath()).c_str());
-    calibration2dNew =  new AlgorithmCalibration<TrackClassFilterCategory,CalibratedHistogramXML>((f2d.fullPath()).c_str());
-    vector<float> * bins =0;
-    if(m_resetData)
-      {
-	if(m_newBinning)  bins = new  vector<float>(CalibratedHistogram::constantBinning(m_nBin,0,m_range));
-	vector<pair<TrackClassFilterCategory, CalibratedHistogramXML> > data = calibrationNew->categoriesWithData();
-	vector<pair<TrackClassFilterCategory, CalibratedHistogramXML> > data2d = calibration2dNew->categoriesWithData();
-      	std::cout <<  data.size() <<  std::endl;
-	for(unsigned int i = 0 ; i < data.size();i++)
-          {
-            data[i].second.reset();
-            if(bins)  data[i].second.setUpperLimits(*bins);
-          }
-	for(unsigned int i = 0 ; i < data2d.size();i++)
-          {
-            data2d[i].second.reset();
-            if(bins)  data2d[i].second.setUpperLimits(*bins);
-          }
-	
-      }
-    if(bins) delete bins;
-    
-*/
+  std::cout << "line 302" << std::endl;
 
 
 }
@@ -372,56 +337,49 @@ ImpactParameterCalibration::endJob() {
   {
     edm::Service<cond::service::PoolDBOutputService> mydbservice;
     if( !mydbservice.isAvailable() ) return;
-    if(minLoop == 0 )  mydbservice->createNewIOV<TrackProbabilityCalibration>(m_calibration[0], mydbservice->beginOfTime(), mydbservice->endOfTime(),"BTagTrackProbability3DRcd");
-    if(maxLoop == 1)   mydbservice->createNewIOV<TrackProbabilityCalibration>(m_calibration[1],  mydbservice->beginOfTime(), mydbservice->endOfTime(),"BTagTrackProbability2DRcd");
+if(minLoop != 1 && maxLoop !=1)    mydbservice->createNewIOV<TrackProbabilityCalibration>(m_calibration[0],  mydbservice->endOfTime(),"BTagTrackProbability3DRcd");
+  if(minLoop != 0 && maxLoop !=0)   mydbservice->createNewIOV<TrackProbabilityCalibration>(m_calibration[1],  mydbservice->endOfTime(),"BTagTrackProbability2DRcd");
   } 
     
 
   if(config.getParameter<bool>("writeToRootXML"))
   {
-    if(maxLoop == 1 ){
-      std::ofstream of2("2d.xml");
-      TBufferXML b2(TBuffer::kWrite);
-      of2 << b2.ConvertToXML(const_cast<void*>(static_cast<const void*>(m_calibration[1])),
-			     TClass::GetClass("TrackProbabilityCalibration"),
-			     kTRUE, kFALSE);
-      of2.close();
-    }
-    if(minLoop == 0 ){
-      std::ofstream of3("3d.xml");
-      TBufferXML b3(TBuffer::kWrite);
-      of3 << b3.ConvertToXML(const_cast<void*>(static_cast<const void*>(m_calibration[0])),
-			     TClass::GetClass("TrackProbabilityCalibration"),
-			     kTRUE, kFALSE);
-      of3.close();
-    }
+   std::ofstream of2("2d.xml");
+   TBufferXML b2(TBuffer::kWrite);
+   of2 << b2.ConvertToXML(const_cast<void*>(static_cast<const void*>(m_calibration[1])),
+                                                  TClass::GetClass("TrackProbabilityCalibration"),
+                                                  kTRUE, kFALSE);
+   of2.close();
+   std::ofstream of3("3d.xml");
+   TBufferXML b3(TBuffer::kWrite);
+   of3 << b3.ConvertToXML(const_cast<void*>(static_cast<const void*>(m_calibration[0])),
+                                                  TClass::GetClass("TrackProbabilityCalibration"),
+                                                  kTRUE, kFALSE);
+   of3.close();
   }
 
  
   if(config.getParameter<bool>("writeToBinary"))
   {
-    if(maxLoop == 1 ){
-      
-      std::ofstream ofile("2d.dat");
-      MyTBuffer buffer(TBuffer::kWrite);
-      buffer.StreamObject(const_cast<void*>(static_cast<const void*>(m_calibration[1])),
-			  TClass::GetClass("TrackProbabilityCalibration"));
-      Int_t size = buffer.Length();
-      ofile.write(buffer.Buffer(),size);
-      ofile.close();
-    }
-    if(minLoop == 0 ){
-      std::ofstream ofile3("3d.dat");
-      MyTBuffer buffer3(TBuffer::kWrite);
-      buffer3.StreamObject(const_cast<void*>(static_cast<const void*>(m_calibration[0])),
-			   TClass::GetClass("TrackProbabilityCalibration"));
-      Int_t size3 = buffer3.Length();
-      ofile3.write(buffer3.Buffer(),size3);
-      ofile3.close();
-    }
+    /*    std::ofstream ofile("2d.dat");
+    TBuffer buffer(TBuffer::kWrite);
+    buffer.StreamObject(const_cast<void*>(static_cast<const void*>(m_calibration[1])),
+                                                  TClass::GetClass("TrackProbabilityCalibration"));
+    Int_t size = buffer.Length();
+    ofile.write(buffer.Buffer(),size);
+    ofile.close();
+
+    std::ofstream ofile3("3d.dat");
+    TBuffer buffer3(TBuffer::kWrite);
+    buffer3.StreamObject(const_cast<void*>(static_cast<const void*>(m_calibration[0])),
+                                                  TClass::GetClass("TrackProbabilityCalibration"));
+    Int_t size3 = buffer3.Length();
+    ofile3.write(buffer3.Buffer(),size3);
+    ofile3.close();
+    */
   }
-  
-  
+
+
 
 
 
