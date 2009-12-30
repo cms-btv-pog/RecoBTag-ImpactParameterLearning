@@ -8,6 +8,7 @@
 <use name=DataFormats/TrackReco>
 <use name=DataFormats/VertexReco>
 <use name=DataFormats/BTauReco>
+<use name=CondFormats/BTauObjects>
 
 # we do not use a method in a .cc file (::read and ::write)
 #<use name=RecoBTag/XMLCalibration>
