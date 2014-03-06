@@ -212,7 +212,7 @@ void JetProbaValidation::ComputeProba(const char*fileInPutName)
 
   for(unsigned int i=0; i<catDefList.size(); i++){
   
-    catDefList[i].GetHistoFromFile(myinputfile );
+    catDefList[i].GetDistribFromFile(myinputfile );
   
   }
 
