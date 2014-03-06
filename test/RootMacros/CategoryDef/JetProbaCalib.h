@@ -253,6 +253,9 @@ public :
    virtual int   IsInCategory(float trkEta, float trkHTrk, float trkHPix, float trkp, float trkChi2, std::vector<CategoryDef > d);
    virtual bool  passTrackSel(int trk, int pix, float ip2d, float pt, float len, float chi2, float zip, float dist, float eta, float etaJet, float phi, float phiJet, float ptJet);
  
+   virtual void xmlFirst();
+   virtual void producexml( CategoryDef cat); 
+   virtual void xmlLast();
 
 
 };

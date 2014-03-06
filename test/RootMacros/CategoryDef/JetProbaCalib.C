@@ -22,9 +22,9 @@
 
 using namespace std;
 
-std::ofstream out_txt("Histo_25.xml", ios::out);
 
 
+std::ofstream out_txt("CalibrationFiles/Calib3D.xml", ios::out);
 
 //-----------------------------------------------------Find the category of a given track----------------------------------------------------------------------------------------//
 int JetProbaCalib::IsInCategory(float trkEta, float trkHTrk, float trkHPix, float trkp, float trkChi2, std::vector<CategoryDef >  d){
@@ -165,9 +165,17 @@ void JetProbaCalib::Loop()
 
 	
 	  
-   //Store histograms into DB format
+   //Store histograms into xml for the DB
 
-    
+   xmlFirst();
+   
+   for(unsigned int i=0; i< vectCategories.size(); i++){
+    producexml( vectCategories[i]);
+   }  
+   
+   xmlLast();
+
+
   
   //store histograms into root format
   CategoryDefCollection  catDefVector;
@@ -192,6 +200,110 @@ void JetProbaCalib::Loop()
     
   
 }
+
+
+
+
+//-----------------------------------------------------------//
+//-----------For output into XML format----------------------//
+//-----------------------------------------------------------//
+
+
+
+void  JetProbaCalib::xmlFirst()
+{
+  out_txt << "<Object class=\"TrackProbabilityCalibration\">" << endl;
+  out_txt << "  <Class name=\"TrackProbabilityCalibration\" version=\"1\">" << endl;
+  out_txt << "    <Member name=\"data\">" << endl;
+  out_txt << "      <Item name=\"Version\" v=\"6\"/>" << endl;
+  out_txt << "      <Item name=\"Int_t\" v=\"10\"/>" << endl;
+ 
+}
+
+
+void  JetProbaCalib::producexml( CategoryDef cat )
+{ 
+
+  // TH1D* hcat = (TH1D*)gROOT->FindObject((catname.c_str()));  
+  
+  
+  //TH1F *hcat = &cat.histo;
+  
+  TH1D* hcat = cat.histo;  
+  
+  out_txt << "       <Object class=\"TrackProbabilityCalibration::Entry\">" << endl; 
+  out_txt << "        <Class name=\"TrackProbabilityCalibration::Entry\" version=\"1\">" << endl;
+  out_txt << "  	<Member name=\"category\">"  << endl;
+  out_txt << "  	  <Class name=\"TrackProbabilityCategoryData\" version=\"1\"> " << endl;
+  
+
+  out_txt << "  	       <Member name=\"pMin\" v=\""<<	       cat.pMin  << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"pMax\" v=\""<<	       cat.pMax  << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"etaMin\" v=\""<<         cat.etaMin << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"etaMax\" v=\""<<         cat.etaMax << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"nHitsMin\" v=\""<<       cat.nHitsMin << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"nHitsMax\" v=\""<<       cat.nHitsMax << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"nPixelHitsMin\" v=\""<<  cat.nPixelHitsMin  << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"nPixelHitsMax\" v=\""<<  cat.nPixelHitsMax << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"chiMin\" v=\""<<         cat.chiMin << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"chiMax\" v=\""<<         cat.chiMax << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"withFirstPixel\" v=\""<< cat.withFirstPixelHit << "\"/>" << endl;
+  out_txt << "  	       <Member name=\"trackQuality\" v=\""<< 1000 << "\"/>" << endl;
+  
+
+
+  out_txt << "  	       </Class>"									 << endl;
+  out_txt << "  	      </Member>"									 << endl;
+  out_txt << "  	      <Member name=\"histogram\">"							 << endl;
+  out_txt << "  	       <Class name=\"PhysicsTools::Calibration::Histogram_float_float_\" version=\"1\">" << endl;
+  out_txt << "  		 <Member name=\"binULimits\">"  						 << endl;
+  out_txt << "  		  <Item name=\"Version\" v=\"6\"/>"						 << endl;
+  out_txt << "  		  <Item name=\"Int_t\" v=\"0\"/>"						 << endl;
+  out_txt << "  		 </Member>"									 << endl;
+  out_txt << "  		 <Member name=\"binValues\">"							 << endl;
+  out_txt << "  		  <Item name=\"Version\" v=\"6\"/>"						 << endl;
+  out_txt << "  		  <Item name=\"Int_t\" v=\""<<hcat->GetNbinsX() <<"\"/>"		       << endl;
+  out_txt << "  		  <Item name=\"Array\">  "							 << endl;
+  
+       
+  nbins = hcat->GetNbinsX();
+
+  for(int i=1;i <= nbins;i++)
+    {   double entry = hcat->GetBinContent(i);
+        out_txt << "                      <Item name=\"Float_t\" v=\""<<
+	fixed<<setprecision(6)<<entry <<  "\"/>" << endl; 
+      //cout << " get bin x " << hcat->GetBinContent(i) <<  endl; 
+    }
+
+ out_txt << "		    </Item> "<< endl;
+ out_txt << "		   </Member> "<< endl;
+ out_txt << "		   <Member name=\"limits\"> "<< endl;
+ out_txt << "		     <Class name=\"PhysicsTools::Calibration::Range_float_\" version=\"1\"> "<< endl;
+ out_txt << "		       <Member name=\"min\" v=\"0.000000\"/> "<< endl;
+ out_txt << "		       <Member name=\"max\" v=\""<< hcat->GetXaxis()->GetXmax() <<"\"/> "<< endl;
+ out_txt << "		     </Class> "<< endl;
+ out_txt << "		   </Member> "<< endl;
+ out_txt << "		 </Class> "<< endl;
+ out_txt << "	       </Member> "<< endl;
+ out_txt << "	     </Class> "<< endl;
+ out_txt << "	   </Object> "<< endl;
+
+
+
+
+}
+
+
+void  JetProbaCalib::xmlLast(){
+
+ out_txt << "	 </Member>"<< endl;
+ out_txt << "  </Class>"<< endl;
+ out_txt << "</Object>"<< endl;
+
+}
+
+
+
 
 
 
