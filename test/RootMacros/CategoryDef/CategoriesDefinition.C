@@ -211,7 +211,7 @@ std::vector<CategoryDef > CategoriesDefinition::CategoryList(){
 }
 
 
-
+/*
 std::vector<CategoryDef > CategoriesDefinition::CategoryList(){
 
   std::vector<CategoryDef > vectCategories;
