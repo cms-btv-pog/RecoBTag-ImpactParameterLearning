@@ -256,7 +256,7 @@ public :
    
    
    
-   virtual double jetProbability( std::vector<double>  v) ;
+   virtual double jetProbability( std::vector<double>  v, int theIPsign) ;
    virtual int    IsInCategory(float trkEta, float trkHTrk, float trkHPix, float trkp, 
    float trkChi2, std::vector<CategoryDef > d);
    virtual void    ComputeProba(const char*fileInPutName);

@@ -21,6 +21,10 @@ using namespace std;
 
 
 
+int theIPsign = 1;
+
+
+
 //-----------------------------------------------------Find the category of a given track----------------------------------------------------------------------------------------//
 int JetProbaValidation::IsInCategory(float trkEta, float trkHTrk, float trkHPix, float trkp, float trkChi2, std::vector<CategoryDef > d){
   
@@ -134,8 +138,7 @@ double JetProbaValidation::calculTrackProba( float ipsig, CategoryDef theCat){
   
 }
 
-
-double JetProbaValidation::jetProbability( std::vector<double>  v) 
+double JetProbaValidation::jetProbability( std::vector<double>  v, int ipsign) 
 
 {
   std::vector<double> probabilities;
@@ -143,20 +146,23 @@ double JetProbaValidation::jetProbability( std::vector<double>  v)
 
   for(std::vector<double>::const_iterator it = v.begin(); it!=v.end(); ++it, i++)
   {
-         
-      float p;
-      //if(*it >=0 ) p=*it; else continue; 
-      if (*it >=0){p=*it/2.;}else{p=1.-*it/2.;}
-      //p=*it ; 
+               
+     float p =0;
+     if(ipsign ==0 ) { 
+	    if (*it >=0){p=*it/2.;}else{p=1.+*it/2.;}
+     } else if( ipsign> 0){
+	     if(*it >=0 ) p=*it; else continue; 
+     } else {
+       if(*it <=0 ) p= -*it; else continue; 
+     } 
       probabilities.push_back(p);
 
   } 
 	 
  
   double m_minTrackProb= 0.005;
-  int ngoodtracks=v.size();
+  int ngoodtracks=probabilities.size();
   double SumJet=0.;
-
 
   for(std::vector<double>::const_iterator q = probabilities.begin(); q != probabilities.end(); q++){
     SumJet+=(*q>m_minTrackProb)?log(*q):log(m_minTrackProb);
@@ -184,11 +190,12 @@ double JetProbaValidation::jetProbability( std::vector<double>  v)
   if(ProbJet>1)
    std::cout << "ProbJet too high: "  << ProbJet << std::endl;
 
-
-   return -log10(ProbJet)/4.;
+  //double LogProbJet=-log(ProbJet);
+  //  //return 1.-ProbJet;
+      return -log10(ProbJet)/4.;
+      
       
 }
-
 
 
 
@@ -219,7 +226,7 @@ void JetProbaValidation::ComputeProba(const char*fileInPutName)
   TFile* myfileout = new TFile("JP_myCalib.root", "recreate");
   myfileout->cd();
   
-  int nbin_trkH=50;
+  int nbin_trkH=25;
   float xmin_trkH=0.0;
   float xmax_trkH=1.0;  
 
@@ -229,8 +236,9 @@ void JetProbaValidation::ComputeProba(const char*fileInPutName)
   TH1D * JetProba = new TH1D("JetProba", "JetProba", 100, 0.0, 2.5);
   
   TH1D * trackPCat_all = new TH1D("trackPCat_all", "trackPCat_all", nbin_trkH, xmin_trkH, xmax_trkH);
-
+ 
   std::vector<TH1D *> vectTrkProba; 
+  std::vector<TH1D *> vectTrkProba_old; 
   
   
   
@@ -239,9 +247,20 @@ void JetProbaValidation::ComputeProba(const char*fileInPutName)
     vectTrkProba.push_back(tmphisto);  
   }
   
+  
+  for(unsigned int i = 0; i<catDefList.size(); i++){
+    TH1D* tmphisto_old = new TH1D( (catDefList[i].histoname+"proba_old").Data(), (catDefList[i].histoname+"proba_old").Data()  , nbin_trkH, xmin_trkH, xmax_trkH);
+    vectTrkProba_old.push_back(tmphisto_old);  
+  }
   TH1F * jetProbaDiscriB = new TH1F("jetProbaDiscriB", "jetProbaDiscriB", 101, 0, 1); 
   TH1F * jetProbaDiscriUDSG = new TH1F("jetProbaDiscriUDSG", "jetProbaDiscriUDSG", 101, 0, 1);
    
+  
+  
+  
+  
+  
+  
   
   
   std::vector<double > vectProba;
@@ -266,7 +285,7 @@ void JetProbaValidation::ComputeProba(const char*fileInPutName)
     for (int ijet=0; ijet<nJet ; ijet++){
     
       
-      if (Jet_pt[ijet]>20 && fabs(Jet_eta[ijet]) < 2.5 ){
+      if (Jet_pt[ijet]> 10 && fabs(Jet_eta[ijet]) < 2.5 ){
       
       
       
@@ -292,17 +311,19 @@ void JetProbaValidation::ComputeProba(const char*fileInPutName)
 	    , Track_chi2[itrack], catDefList);
 
 	     if(catnum >=0) {
-	      proba=calculTrackProba( Track_IPsig[itrack], catDefList[catnum]); 
-	    
+	      //proba=calculTrackProba( Track_IPsig[itrack], catDefList[catnum]); 
+	      proba= catDefList[catnum].calculTrackProba( -1*Track_IPsig[itrack]); 
+	      
 	      vectProba.push_back(proba);
 	      vectTrkProba[catnum]->Fill(proba);
+	      vectTrkProba_old[catnum]->Fill( -1*Track_Proba[itrack]);
 	     }else{
-	      cout << "no category found for this track " <<  endl;
+	      /*cout << "no category found for this track " <<  endl;
 	      cout << "Track_p[itrack]              " << Track_p[itrack]    << endl;
 	      cout << "Track_eta[itrack]            " << Track_eta[itrack]  << endl;
 	      cout << "Track_chi2[itrack]           " << Track_chi2[itrack] << endl;
 	      cout << "Track_nHitPixel[itrack]      " << Track_nHitPixel[itrack]<< endl;
-	      cout << "Track_nHitAll[itrack]        " << Track_nHitAll[itrack]  << endl;
+	      cout << "Track_nHitAll[itrack]        " << Track_nHitAll[itrack]  << endl;*/
 	      
 	    }
 
@@ -311,9 +332,7 @@ void JetProbaValidation::ComputeProba(const char*fileInPutName)
 	  
 	}
 	
-        if (vectProba.size()!=0) jetP=jetProbability( vectProba);
-	
-	    
+        if (vectProba.size()!=0) jetP=jetProbability( vectProba, theIPsign);
 	
 	JetProba->Fill(jetP);
 	
@@ -330,8 +349,10 @@ void JetProbaValidation::ComputeProba(const char*fileInPutName)
   
   
   for(unsigned int i = 0; i<catDefList.size(); i++) vectTrkProba[i]->Write();
+  for(unsigned int i = 0; i<catDefList.size(); i++) vectTrkProba_old[i]->Write();
   
-  trackPCat_all->Write();  
+  trackPCat_all->Write(); 
+  JetProba ->Write(); 
   jetProbaDiscriB ->Write(); 
   jetProbaDiscriUDSG->Write(); 
 
