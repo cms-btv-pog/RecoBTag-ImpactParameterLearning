@@ -402,19 +402,19 @@ void ImpactParameterCalibration::processJets(const edm::Handle<PatJetCollection>
     
     double ptjet  = pjet->pt()  ;
     double jeteta = pjet->eta() ;
-    double jetphi = pjet->phi() ;
+    //double jetphi = pjet->phi() ;
     
     
     if (ptjet>10 && fabs(jeteta)<2.5) {
     
-      float etajet = TMath::Abs( pjet->eta() );
-      float phijet = pjet->phi();
+      //float etajet = TMath::Abs( pjet->eta() );
+      //float phijet = pjet->phi();
       
-      if (phijet < 0.) phijet += 2*TMath::Pi();
+      //if (phijet < 0.) phijet += 2*TMath::Pi();
       
       const edm::RefVector<reco::TrackCollection>  &selected_tracks( pjet->tagInfoTrackIP("impactParameter")->selectedTracks() );
       
-      int ntagtracks = pjet->tagInfoTrackIP("impactParameter")->probabilities(0).size();
+      //int ntagtracks = pjet->tagInfoTrackIP("impactParameter")->probabilities(0).size();
       
       unsigned int trackSize = selected_tracks.size();
       
@@ -442,18 +442,18 @@ void ImpactParameterCalibration::processJets(const edm::Handle<PatJetCollection>
 	    
 	    Double_t distJetAxis =  IPTools::jetTrackDistance(transientTrack, direction, *pv).second.value();
 	    
-	    double Track_dist     = distJetAxis;
-	    double Track_length   = decayLength;
+	    //double Track_dist     = distJetAxis;
+	    //double Track_length   = decayLength;
 	    
-	    double Track_dxy      = ptrack.dxy(pv->position());
-	    double Track_dz       = ptrack.dz(pv->position());
-	    double Track_zIP      = ptrack.dz()-(*pv).z();
+	    //double Track_dxy      = ptrack.dxy(pv->position());
+	    //double Track_dz       = ptrack.dz(pv->position());
+	    //double Track_zIP      = ptrack.dz()-(*pv).z();
 	    
-	    float deta = ptrack.eta() - jeteta;
-	    float dphi = ptrack.phi() - jetphi;
+	    //float deta = ptrack.eta() - jeteta;
+	    //float dphi = ptrack.phi() - jetphi;
 	    
-	    if ( dphi > TMath::Pi() ) dphi = 2.*TMath::Pi() - dphi;
-	    float deltaR = TMath::Sqrt(deta*deta + dphi*dphi);
+	    //if ( dphi > TMath::Pi() ) dphi = 2.*TMath::Pi() - dphi;
+	    //float deltaR = TMath::Sqrt(deta*deta + dphi*dphi);
 	    
 	    bool pass_cut_trk =false;
 	    
@@ -466,11 +466,11 @@ void ImpactParameterCalibration::processJets(const edm::Handle<PatJetCollection>
 	    TrackClassMatch::Input input(ptrack,*pjet,*pv);
 	    
 	    if (pass_cut_trk ){
-	      double Track_IP2D	 = pjet->tagInfoTrackIP("impactParameter")->impactParameterData()[k].ip2d.value();
+	      /*double Track_IP2D	 = pjet->tagInfoTrackIP("impactParameter")->impactParameterData()[k].ip2d.value();
 	      double Track_IP2Dsig   = pjet->tagInfoTrackIP("impactParameter")->impactParameterData()[k].ip2d.significance();
-	      double Track_IP	 = pjet->tagInfoTrackIP("impactParameter")->impactParameterData()[k].ip3d.value();
+	      double Track_IP	 = pjet->tagInfoTrackIP("impactParameter")->impactParameterData()[k].ip3d.value();*/
 	      double Track_IPsig	 = pjet->tagInfoTrackIP("impactParameter")->impactParameterData()[k].ip3d.significance();
-	      double Track_IP2Derr   = pjet->tagInfoTrackIP("impactParameter")->impactParameterData()[k].ip2d.error();
+	      /*double Track_IP2Derr   = pjet->tagInfoTrackIP("impactParameter")->impactParameterData()[k].ip2d.error();
 	      double Track_IPerr	 = pjet->tagInfoTrackIP("impactParameter")->impactParameterData()[k].ip3d.error();
 	      double Track_Proba	 = pjet->tagInfoTrackIP("impactParameter")->probabilities(0)[k];	
 	      double Track_p	 = ptrack.p();
@@ -487,7 +487,7 @@ void ImpactParameterCalibration::processJets(const edm::Handle<PatJetCollection>
 	      int    Track_nHitTEC  = ptrack.hitPattern().numberOfValidStripTECHits();
 	      int    Track_nHitPXB  = ptrack.hitPattern().numberOfValidPixelBarrelHits();
 	      int    Track_nHitPXF  = ptrack.hitPattern().numberOfValidPixelEndcapHits(); 	    
-	
+	      */
 	      
 //  	    cout << "-------------------------- " << endl;
 // // 	    

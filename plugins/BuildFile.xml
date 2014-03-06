@@ -17,6 +17,13 @@
   <use   name="CondFormats/BTauObjects"/>
   <use   name="rootxmlio"/>
   <use   name="boost"/>
+  <use   name="TrackingTools/TransientTrack"/>
+  <use   name="PhysicsTools/UtilAlgos"/>
+  <use   name="CommonTools/UtilAlgos"/>
+  <use   name="DataFormats/PatCandidates"/>
+  <use   name="DataFormats/TrackReco"/>
+  <use   name="TrackingTools/Records"/>
+  <use   name="TrackingTools/IPTools"/>
   <flags   EDM_PLUGIN="1"/>
 </library>
 <library   file="SumHistoCalibration.cc" name="SumHistoCalibration">
