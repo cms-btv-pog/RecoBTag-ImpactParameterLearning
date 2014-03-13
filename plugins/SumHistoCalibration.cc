@@ -262,18 +262,29 @@ SumHistoCalibration::endJob() {
   
   
   
-  
+  std::cout << __LINE__ << std::endl;
   
   
   
   if(config.getParameter<bool>("writeToDB"))
     {
+      std::cout << __LINE__ << std::endl;
       edm::Service<cond::service::PoolDBOutputService> mydbservice;
+      std::cout << __LINE__ << std::endl;
       if( !mydbservice.isAvailable() ) return;
+      std::cout << __LINE__ << std::endl;
       //mydbservice->createNewIOV<TrackProbabilityCalibration>(m_calibration[0],  mydbservice->endOfTime(),"BTagTrackProbability3DRcd");
       //mydbservice->createNewIOV<TrackProbabilityCalibration>(m_calibration[1],  mydbservice->endOfTime(),"BTagTrackProbability2DRcd"); 
-      mydbservice->createNewIOV<TrackProbabilityCalibration>(m_calibration[0],  mydbservice->beginOfTime(), mydbservice->endOfTime(),"BTagTrackProbability3DRcd");
-      mydbservice->createNewIOV<TrackProbabilityCalibration>(m_calibration[1],  mydbservice->beginOfTime(), mydbservice->endOfTime(),"BTagTrackProbability2DRcd");
+      //mydbservice->createNewIOV<TrackProbabilityCalibration>(m_calibration[0],  mydbservice->beginOfTime(), mydbservice->endOfTime(),"BTagTrackProbability3DRcd");
+      mydbservice->writeOne<TrackProbabilityCalibration>( m_calibration[0], mydbservice->beginOfTime(),"BTagTrackProbability3DRcd");
+
+
+      
+      std::cout << __LINE__ << std::endl;
+      //mydbservice->createNewIOV<TrackProbabilityCalibration>([1],  mydbservice->beginOfTime(), mydbservice->endOfTime(),"BTagTrackProbability2DRcd"); 
+      mydbservice->writeOne<TrackProbabilityCalibration>( m_calibration[1], mydbservice->beginOfTime(),"BTagTrackProbability2DRcd");
+
+      std::cout << __LINE__ << std::endl;
       
     } 
   
